@@ -10,6 +10,8 @@ import javafx.scene.paint.Color;
 import javafx.geometry.Insets;
 import javafx.scene.layout.*;
 import javafx.scene.input.*;
+import java.util.*;
+
 
 /**
  *
@@ -38,7 +40,7 @@ public class Main extends Application {
   private Button bDiv = new Button();
   private Button bEnter1 = new Button();
   private Button bAdd = new Button();
-  static private TextArea output = new TextArea();
+  static private TextArea textOut = new TextArea();
   private Button bComma = new Button();
   private Button bNeg = new Button();
   private Button bBrL = new Button();
@@ -46,6 +48,14 @@ public class Main extends Application {
   private Button bClear = new Button();
   private Button bDelete = new Button();
 
+  ArrayList<Double> zahlen = new ArrayList <Double>();
+  ArrayList<Character> operatoren = new ArrayList<Character>();
+
+  String opInReihe = "*/+-"; //Die Operatoren in der richtigen Rechenreihenfolge  
+  String ReiheTest = new String();
+  
+  String output = new String();
+  
   static String CharSequence = "*/+-";
   Pane root; 
   
@@ -56,7 +66,6 @@ public class Main extends Application {
     root.setBackground(new Background(new BackgroundFill(Color.web("0xC0C0C0"), CornerRadii.EMPTY, Insets.EMPTY)));
     Scene scene = new Scene(root, 265, 362);
     // Anfang Komponenten
-    
     b7.setLayoutX(32);
     b7.setLayoutY(192);
     b7.setPrefHeight(32);
@@ -74,7 +83,7 @@ public class Main extends Application {
     b8.setOnAction(
     (event) -> {b8_Action(event);} 
     );
-    root.getChildren().add(b8);
+    root.getChildren().add(b8); //Fehler
     b9.setLayoutX(128);
     b9.setLayoutY(192);
     b9.setPrefHeight(32);
@@ -179,16 +188,17 @@ public class Main extends Application {
     bAdd.setLayoutY(152);
     bAdd.setPrefHeight(32);
     bAdd.setPrefWidth(48);
-    bAdd.setText("+");
+    bAdd.setText("+"); //Fehler
     bAdd.setOnAction(
     (event) -> {bAdd_Action(event);} 
     );
     root.getChildren().add(bAdd);
-    output.setLayoutX(32);
-    output.setLayoutY(16);
-    output.setPrefHeight(80);
-    output.setPrefWidth(192);
-    root.getChildren().add(output);
+    textOut.setLayoutX(32);
+    textOut.setLayoutY(16);
+    textOut.setPrefHeight(80);
+    textOut.setPrefWidth(192);
+    root.getChildren().add(textOut);
+    
     b0.setLayoutX(32);
     b0.setLayoutY(312);
     b0.setPrefHeight(32);
@@ -208,6 +218,8 @@ public class Main extends Application {
     );
     bComma.setFont(Font.font("Dialog", 14));
     root.getChildren().add(bComma);
+
+    /*
     bNeg.setLayoutX(128);
     bNeg.setLayoutY(312);
     bNeg.setPrefHeight(32);
@@ -215,9 +227,11 @@ public class Main extends Application {
     bNeg.setText("+/-");
     bNeg.setOnAction(
     (event) -> {bNeg_Action(event);} 
-    );
+    );  
     root.getChildren().add(bNeg);
-    bBrL.setLayoutX(80);
+    */
+    
+    bBrL.setLayoutX(80); //Fehler
     bBrL.setLayoutY(152);
     bBrL.setPrefHeight(32);
     bBrL.setPrefWidth(40);
@@ -250,7 +264,7 @@ public class Main extends Application {
     bDelete.setPrefWidth(40);
     bDelete.setText("<-");
     bDelete.setOnAction(
-    (event) -> {bDelete_Action(event);} 
+    (event) -> {bDelete_Action(event);} //Fehler
     );
     root.getChildren().add(bDelete);
     // Ende Komponenten
@@ -269,128 +283,209 @@ public class Main extends Application {
   } // end of main
 
   public String solve(String input){
-    String output = "";
-    if(input.contains(" ")){
-      String[] inputArrays = input.split(" ");
-    }else{
-      throw new IllegalArgumentException("Input doesnt contain any spaces");
+
+    String returnOutput = new String();
+    double zwischenergebnis = 0;
+    
+    for(int i = 0; i < input.length(); i++){ //geht durch alle Zeichen in der Eingabe
+      //prüft ob Operator, schreibt in Operatorenliste
+      if(input.charAt(i) == '+' || input.charAt(i) == '-' || input.charAt(i) == '*' || input.charAt(i) == '/'){
+        operatoren.add(input.charAt(i));
+        //System.out.println(input.charAt(i));
+      
+      //prüft ob Zahl, schreibt in Zahlenliste
+      } else if(Character.isDigit(input.charAt(i))) { 
+        zahlen.add((double) input.charAt(i) - 48);  // 48 ist nötig
+        //System.out.println(input.charAt(i));
+      }
+      //weder Zahl noch Operator -> Fehler    
+      else{
+        System.out.println("Error! Illegal Input");
+      }
+      
+
     }
+
+    for(int i = 0; i < opInReihe.length(); i++){         //gehe durch alle Operatoren in der richtigen Rechenreihenfolge
+      for(int j = 0; j < operatoren.size(); j++){        //gehe durch alle eingegebenen Operatoren   
+        char currentChar = operatoren.get(j);            //und vergleiche
+        if(currentChar == opInReihe.charAt(i)){
+          zwischenergebnis = performOperation(zahlen.get(j), zahlen.get(j+1), currentChar);
+          System.out.println(zwischenergebnis);
+
+
+          
+          zahlen.set(j, zwischenergebnis);
+          zahlen.remove(j+1);
+          
+          //operatoren.remove(j);
+          
+          //teste: nicht die Zahlen ersetzen, sondern zwischenergebnis adden, aber Operator ?!?!?
+          
+          //aktuelles (11.02.25)Problem: 5+6+9=15
+          //wahrscheinliche Lösung: Entfernen von benutzten Zahlen und Operatoren
+          
+          //ersetze output.append mit output = output + etwas
+          
+        }
+      }
+    }
+    
+    System.out.println(zahlen);
+    System.out.println(operatoren);
     return "0";
   }
 
-  public static void checkIfCanBeWritten(Character c) { //prevents illegal charsequences like 1++1
-    if(output.getText().length() != 0){
-      if(!CharSequence.contains(output.getText().charAt(output.getText().length() - 1) + "")) {
-        output.appendText(c + "");
+  public void checkIfCanBeWritten(Character c) { //prevents illegal charsequences like 1++1 and automatiallly writes it if allowed
+    if(textOut.getLength() != 0){
+      if(!CharSequence.contains(output.charAt(textOut.getLength() - 1) + "")) {
+        textOut.appendText(c + "");
+        output = output + c;
       }else{
-        throw new IllegalArgumentException("Can't write " + c + " after " + output.getText().charAt(output.getText().length() - 1));
+        System.out.println("Error! Can't write " + c + " after " + output.charAt(output.length() - 1));
+        //throw new IllegalArgumentException("Can't write " + c + " after " + output.charAt(output.length() - 1));
       }
     }else {
-      throw new IndexOutOfBoundsException("Bounds is zero");   
+      System.out.println("Error! Keine Zahl vor dem Operator vorhanden!"); 
+        
     } 
   }
   
-  public void b0_Action(Event evt) {
-    output.appendText("0");
-    System.out.println(output);
-    checkIfCanBeWritten('0');
+
+  public static double performOperation(double operand1, double operand2, char operator) {
+    switch (operator) {
+      case '+':
+        return operand1 + operand2;
+      case '-':
+        return operand1 - operand2;
+      case '*':
+        return operand1 * operand2;
+      case '/':
+        if (operand2 == 0) {
+          throw new ArithmeticException("Division by zero");
+        }
+        return operand1 / operand2;
+    }
+    throw new IllegalArgumentException("Invalid operator: " + operator);
+  }
+
+  //Prints inputs and only checks if it's a special character, that isn't allowed to be written twice or at the beginning and prevents it
+  //Use either output.appendText() or checkIfCanBeWritten() but not both
+    
+  public void b0_Action(Event evt) {   
+    textOut.appendText("0");
+    output = output + "0";
   } 
   
   public void b1_Action(Event evt) {
-    output.appendText("1");
-    checkIfCanBeWritten('1');
+    textOut.appendText("1");
+    output = output + "1";
   }
   
   public void b2_Action(Event evt) {
-    output.appendText("2");
-    checkIfCanBeWritten('2');
+    textOut.appendText("2");
+    output = output + "2";
   } 
   
   public void b3_Action(Event evt) {
-    output.appendText("3");
-    checkIfCanBeWritten('3');
+    textOut.appendText("3");
+    output = output + "3";
   }
   
   public void b4_Action(Event evt) {
-    output.appendText("4");
-    checkIfCanBeWritten('4');
+    textOut.appendText("4");
+    output = output + "4";
   } 
   
   public void b5_Action(Event evt) {
-    output.appendText("5");
-    checkIfCanBeWritten('5');
+    textOut.appendText("5");
+    output = output + "5";
+    
   } 
   
   public void b6_Action(Event evt) {
-    output.appendText("6");
+    textOut.appendText("6");
+    output = output + "6";
+    
   } 
   
   public void b7_Action(Event evt) {
-    output.appendText("7");
+    textOut.appendText("7");
+    output = output + "7";
   } 
 
   public void b8_Action(Event evt) {
-    output.appendText("8");
+    textOut.appendText("8");
+    output = output + "8";
   } 
 
   public void b9_Action(Event evt) {
-    output.appendText("9");
+    textOut.appendText("9");
+    output = output + "9";
   }  
 
   public void bSubtr_Action(Event evt) {
-    output.appendText("-");
+    checkIfCanBeWritten('-');
+    
   }
 
   public void bTimes_Action(Event evt) {
-    checkIfCanBeWritten('*'); 
-    output.appendText("*");   
+    checkIfCanBeWritten('*');  
+    
   }
 
   public void bDiv_Action(Event evt) {
     checkIfCanBeWritten('/');
-    output.appendText("/");
+    
   }
 
   public void bAdd_Action(Event evt) {
     checkIfCanBeWritten('+');
-    output.appendText("+");
+    
   }
 
   public void bComma_Action(Event evt) {
-    checkIfCanBeWritten(',');
-    output.appendText(","); 
+    checkIfCanBeWritten(','); 
   }
 
   /*
   public void bNeg_Action(Event evt) {
     checkIfCanBeWritten('(-)');
-    output.appendText("(-)");
   }
   */
   
   public void bBrL_Action(Event evt) {
-
-    output.appendText("(");
+    textOut.appendText("(");
   }
 
   public void bBrR_Action(Event evt) {
-
-    output.appendText(")"); 
+    textOut.appendText(")"); 
   }
   
   public void bEnter_Action(Event evt) {
-
-    output.appendText("=");
+    //add solve function
+    String solution = solve(output);
+    textOut.clear();
+    textOut.appendText(zahlen.get(0) + "");
+    System.out.println(output);
+    
+      
+    
   }
 
   public void bClear_Action(Event evt) {
 
-    output.clear();
+    output = "";
+    textOut.clear();
+    zahlen.clear();
+    operatoren.clear();
   }
 
   public void bDelete_Action(Event evt) {
+    //add liste löschen, je nach zahl oder operator
+    output.substring(0, output.length() - 1); //Fehler
+    textOut.deleteText(textOut.getLength()-1, textOut.getLength());
 
-    output.deleteText(output.getLength()-1, output.getLength());
   }
   public void Rechner(String input) {
     
