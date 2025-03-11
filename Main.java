@@ -338,7 +338,7 @@ public class Main extends Application {
 
   public void checkIfCanBeWritten(Character c) { //prevents illegal charsequences like 1++1 and automatiallly writes it if allowed
     if(textOut.getLength() != 0){
-      if(!CharSequence.contains(output.charAt(textOut.getLength() - 1) + "")) {
+      if(!CharSequence.contains(String.valueOf(output.charAt(output.length() - 1)))) {
         textOut.appendText(c + "");
         output = output + c;
       }else{
@@ -483,9 +483,10 @@ public class Main extends Application {
 
   public void bDelete_Action(Event evt) {
     //add liste löschen, je nach zahl oder operator
-    output.substring(0, output.length() - 1); //Fehler
-    textOut.deleteText(textOut.getLength()-1, textOut.getLength());
-
+    if (output.length() > 0) {
+      output = output.substring(0, output.length() - 1);
+      textOut.deleteText(textOut.getLength()-1, textOut.getLength());
+    }
   }
   public void Rechner(String input) {
     
