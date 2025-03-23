@@ -308,7 +308,7 @@ public class Main extends Application {
     for (int i = 0; i < operatoren.size(); i++){ 
       int [] POpStellen = new int [operatoren.size()];  
       if (operatoren.get(i) == '*')||(operatoren.get(i) == '/'){
-        POpStellen[] = i; //operatoren = {+,*,/} --> (if) bei 0 ist "+" also macht nix, bei 1 ist "*" also macht Popstellen[0] = 1 weil * an der 1. stellen in operatoren steht.
+        POpStellen[] = i; //operatoren = {+,*,/} --> (if) bei 0 ist "+" also macht nix, bei 1 ist "*" also macht Popstellen[0] = 1 weil * an der 1. stellen in operatoren steht
       }
       
     }
