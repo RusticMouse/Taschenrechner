@@ -1,5 +1,6 @@
 { pkgs }: {
     deps = [
+      pkgs.openssh_hpn
         pkgs.unzip
         pkgs.graalvm17-ce
         pkgs.maven
