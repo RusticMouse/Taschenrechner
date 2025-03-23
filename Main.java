@@ -304,29 +304,41 @@ public class Main extends Application {
       }
       
 
+    }//in der arraylist werden stellen 0,1 leer gelassen als "Rechenstellen", diese Stellen werden dazu genutzt, die Zahlen, die bei den Punktoperatoren stehen als erstes auszurechnen. Dieser code soll erkennen, dass z.B in der Arraylist operatoren bei der Stelle 1 ein Punktoperator steht, darauf speichert es die Zahl 1, bei mehreren Punktoperatoren speichert es auch mehrere Zahlen, wie z.b 1,3. Bei diesen Stellen würde es dann die Stellen in der Zahlen Arraylist finden, also bei 1: (weil 0,1 leer gelassen sind) Stellen 3 und 4 und bei 3: Stellen 5 und 6.
+    for (int i = 0; i < operatoren.size(); i++){ 
+      int [] POpStellen = new int [operatoren.size()];  
+      if (operatoren.get(i) == '*')||(operatoren.get(i) == '/'){
+        POpStellen[] = i; //operatoren = {+,*,/} --> (if) bei 0 ist "+" also macht nix, bei 1 ist "*" also macht Popstellen[0] = 1 weil * an der 1. stellen in operatoren steht.
+      }
+      
     }
-
+    int opsDone = 0;
+    
     for(int i = 0; i < opInReihe.length(); i++){         //gehe durch alle Operatoren in der richtigen Rechenreihenfolge
       for(int j = 0; j < operatoren.size(); j++){        //gehe durch alle eingegebenen Operatoren   
         char currentChar = operatoren.get(j);            //und vergleiche
         if(currentChar == opInReihe.charAt(i)){
-          zwischenergebnis = performOperation(zahlen.get(j), zahlen.get(j+1), currentChar);
+          zwischenergebnis = performOperation(zahlen.get(j - opsDone), zahlen.get(j - opsDone + 1), currentChar);
           System.out.println(zwischenergebnis);
 
 
           
-          zahlen.set(j, zwischenergebnis);
-          zahlen.remove(j+1);
-          
+          zahlen.set(j - opsDone, zwischenergebnis);
+          zahlen.remove(j - opsDone + 1);
+
+        
           //operatoren.remove(j);
           
           //teste: nicht die Zahlen ersetzen, sondern zwischenergebnis adden, aber Operator ?!?!?
           
-          //aktuelles (11.02.25)Problem: 5+6+9=15
-          //wahrscheinliche Lösung: Entfernen von benutzten Zahlen und Operatoren
+          
+          //bei mal kein output auf dem Textfield
+          //teste: 1+2*3 
           
           //ersetze output.append mit output = output + etwas
-          
+
+          opsDone++;
+          zwischenergebnis = 0;
         }
       }
     }
