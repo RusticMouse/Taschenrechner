@@ -551,11 +551,17 @@ public class Main extends Application {
   
   public void bEnter_Action(Event evt) {
     //add infixToPostfix function
-    String solution = infixToPostfix(output);//hier kein String inputen, sondern ArrayList<String>
-    System.out.println("Solution = " + solution);
+    String postfix = infixToPostfix(output);
+    String solution = solvePostfix(postfix);
+
+    System.out.println("Infix : " + output + " to Postfix : " + postfix);
+    System.out.println("Solution = " + solution);  
+    System.out.println("PopStellen = " + POpstellen);
+
     textOut.clear();
     output = "";
-    System.out.println("PopStellen = " + POpstellen);
+
+    textOut.appendText(solution);
     
   }
 
