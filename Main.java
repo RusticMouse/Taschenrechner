@@ -48,13 +48,13 @@ public class Main extends Application {
   private Button bClear = new Button();
   private Button bDelete = new Button();
 
-  ArrayList<Double> zahlen = new ArrayList <Double>();
-  ArrayList<Character> operatoren = new ArrayList<Character>();
+  ArrayList<String> eingang = new ArrayList<String>();
+  Stack<String> POpstellen = new Stack<String>();
 
   String opInReihe = "*/+-"; //Die Operatoren in der richtigen Rechenreihenfolge  
   String ReiheTest = new String();
   
-  String output = new String();
+  String output = new String(); //kein String nutzen, sondern ArrayList<String>
   
   static String CharSequence = "*/+-";
   Pane root; 
@@ -282,77 +282,134 @@ public class Main extends Application {
     
   } // end of main
 
-  public String solve(String input){
-
-    String returnOutput = new String();
-    double zwischenergebnis = 0;
-    
-    for(int i = 0; i < input.length(); i++){ //geht durch alle Zeichen in der Eingabe
-      //prüft ob Operator, schreibt in Operatorenliste
-      if(input.charAt(i) == '+' || input.charAt(i) == '-' || input.charAt(i) == '*' || input.charAt(i) == '/'){
-        operatoren.add(input.charAt(i));
-        //System.out.println(input.charAt(i));
-      
-      //prüft ob Zahl, schreibt in Zahlenliste
-      } else if(Character.isDigit(input.charAt(i))) { 
-        zahlen.add((double) input.charAt(i) - 48);  // 48 ist nötig
-        //System.out.println(input.charAt(i));
-      }
-      //weder Zahl noch Operator -> Fehler    
-      else{
-        System.out.println("Error! Illegal Input");
-      }
-      
-
-    }//in der arraylist werden stellen 0,1 leer gelassen als "Rechenstellen", diese Stellen werden dazu genutzt, die Zahlen, die bei den Punktoperatoren stehen als erstes auszurechnen. Dieser code soll erkennen, dass z.B in der Arraylist operatoren bei der Stelle 1 ein Punktoperator steht, darauf speichert es die Zahl 1, bei mehreren Punktoperatoren speichert es auch mehrere Zahlen, wie z.b 1,3. Bei diesen Stellen würde es dann die Stellen in der Zahlen Arraylist finden, also bei 1: (weil 0,1 leer gelassen sind) Stellen 3 und 4 und bei 3: Stellen 5 und 6.
-    for (int i = 0; i < operatoren.size(); i++){ 
-      int [] POpStellen = new int [operatoren.size()];  
-      if (operatoren.get(i) == '*')||(operatoren.get(i) == '/'){
-        POpStellen[] = i; //operatoren = {+,*,/} --> (if) bei 0 ist "+" also macht nix, bei 1 ist "*" also macht Popstellen[0] = 1 weil * an der 1. stellen in operatoren steht
-      }
-      
+  public static int rang(char c){
+    switch(c){
+      case '+':
+        return 1;
+      case '-':
+        return 1;
+      case '*':
+        return 2;
+      case '/':
+        return 2;
+      default: 
+        return 0;
     }
-    int opsDone = 0;
+      
+  }
+  
+  public String infixToPostfix(String input){ //hier kein String nutzten, vlt. ArrayList<String>
+
+    //evaluator hier implementieren:
+
+    String initialInput = input;
+    String postfix = new String();
+    char c;
+    int schritteBisKlammer = 0;
     
-    for(int i = 0; i < opInReihe.length(); i++){         //gehe durch alle Operatoren in der richtigen Rechenreihenfolge
-      for(int j = 0; j < operatoren.size(); j++){        //gehe durch alle eingegebenen Operatoren   
-        char currentChar = operatoren.get(j);            //und vergleiche
-        if(currentChar == opInReihe.charAt(i)){
-          zwischenergebnis = performOperation(zahlen.get(j - opsDone), zahlen.get(j - opsDone + 1), currentChar);
-          System.out.println(zwischenergebnis);
-
-
-          
-          zahlen.set(j - opsDone, zwischenergebnis);
-          zahlen.remove(j - opsDone + 1);
-
-        
-          //operatoren.remove(j);
-          
-          //teste: nicht die Zahlen ersetzen, sondern zwischenergebnis adden, aber Operator ?!?!?
-          
-          
-          //bei mal kein output auf dem Textfield
-          //teste: 1+2*3 
-          
-          //ersetze output.append mit output = output + etwas
-
-          opsDone++;
-          zwischenergebnis = 0;
+    for(int i = 0; i < input.length(); i++){
+      c = input.charAt(i);
+      if (c == '+' || c == '-' || c == '*' || c == '/'){ 
+        System.out.println("Operator vorhanden");
+        if((POpstellen.isEmpty())){
+          POpstellen.push(c + "");//<-- Stack für Operatoren
+          System.out.println("Stack ist leer, daher " + c + " gepusht");
+          //If the precedence of the current scanned operator is higher than the precedence of the operator on top of the stack, push
+        } else if((POpstellen.peek() == "(") || (rang(c) > rang(POpstellen.peek().charAt(0)))){
+          POpstellen.push(c + "");
+          System.out.println("c = " + c + " kann gepusht werden -> " + POpstellen);
+        }else{ 
+          System.out.println("POpstellen (pre):" + POpstellen);
+          while(!POpstellen.isEmpty() && rang(c) < rang(POpstellen.peek().charAt(0))){
+            postfix = postfix + POpstellen.pop(); 
+            System.out.println("Higher or equal Precedence gepoppt");
+          }
+          POpstellen.push(c + "");
+          System.out.println("Pushstellen (post):" + POpstellen); //gibt aus was nachdem wir den neuen Operator gepusht haben
         }
+
+      }else if(c == '(' || c == ')'){ //nicht Operator -> Zahl oder Klammern
+        System.out.println("Klammer vorhanden");
+        if(c  == '('){
+          POpstellen.push(c + ""); //höchste precedence, kann sicher gepoppt werden
+          System.out.println("Offene Klammer gepusht");
+        }else{ 
+          schritteBisKlammer = POpstellen.size() - POpstellen.lastIndexOf("(");
+          System.out.println("Schritte bis Klammer: " + schritteBisKlammer);
+          for(int j = 0; j < schritteBisKlammer + 1; j++){
+            System.out.println(j + " POpstellen: " + POpstellen);
+            if(!POpstellen.isEmpty()){
+              if(POpstellen.peek() != "("){
+                postfix = postfix + POpstellen.pop();
+                System.out.println("Ops zwischen Klammern gepoppt");
+              }else{
+                //sollte offene Klammer poppen, funktioniert aber nicht wie gewollt
+                System.out.println("eigentlich offene Klammer gepoppt, tatsächlich: " + POpstellen.pop());      
+              }
+            }else{
+              System.out.println("Empty!");
+            }
+            
+          System.out.println("Pushstellen nach Klammerüberprüfung: " + POpstellen);
+          System.out.println("Postfix: " + postfix);
+          }
+          if(postfix.charAt(postfix.length() - 1) == '('){ //löscht offene Klammer, falls vorhanden (nicht clean)
+            postfix = postfix.substring(0, postfix.length() - 1);
+            System.out.println("Offene Klammer gelöscht");
+          }
+        }
+        }else{ //nicht Operator und nicht Klammer -> Zahl
+        System.out.println("Zahl vorhanden");
+        postfix = postfix + c;
+        System.out.println("Input:" + postfix);
+          
       }
-    }
     
-    System.out.println(zahlen);
-    System.out.println(operatoren);
-    return "0";
+    }
+    while(!POpstellen.isEmpty()){
+      postfix = postfix + POpstellen.pop(); //Poppt alle Operatoren aus dem Stack
+    }
+
+    System.out.println("initialInput:" + initialInput);
+    System.out.println("Letztes Postfix:" + postfix);
+    
+    if(postfix.length() < 3){
+      System.out.println("Error! Your Expression is missing something! returned 0");
+      return "0";
+    } else {
+      return postfix;
+    }
   }
 
-  public void checkIfCanBeWritten(Character c) { //prevents illegal charsequences like 1++1 and automatiallly writes it if allowed
+
+  //löst einen postfix ausdruck, die ersten beiden Elemente müssen Zahlen sein (ist aber bei postfix eigentlich garantiert)
+  public static String solvePostfix(String postfix){
+    Stack<String> stack = new Stack<>();
+    for (int i = 0; i < postfix.length(); i++) {
+      char c = postfix.charAt(i);
+      if(Character.isDigit(c)) {
+        stack.push(c + "");
+      } else if(c == '+' || c == '-' || c == '*' || c == '/') {
+        double operand2 = Double.parseDouble(stack.pop());
+        double operand1 = Double.parseDouble(stack.pop());
+        double result = performOperation(operand1, operand2, c);
+        stack.push(String.valueOf(result));
+      }
+    }
+    return stack.pop();
+  }
+  
+
+  //prevents illegal charsequences like 1++1 and automatiallly writes it if allowed
+  public void checkIfCanBeWritten(Character c) { 
     if(textOut.getLength() != 0){
       if(!CharSequence.contains(String.valueOf(output.charAt(output.length() - 1)))) {
-        textOut.appendText(c + "");
-        output = output + c;
+        if(c == ')' && countOccs(output, '(', 0) <= countOccs(output, ')', 0)){ //prevents output = ()))
+          System.out.println("Error! Can't close bracket, because there is no open bracket!");
+        }else{
+          textOut.appendText(c + "");
+          output = output + c;
+        }
       }else{
         System.out.println("Error! Can't write " + c + " after " + output.charAt(output.length() - 1));
         //throw new IllegalArgumentException("Can't write " + c + " after " + output.charAt(output.length() - 1));
@@ -362,8 +419,21 @@ public class Main extends Application {
         
     } 
   }
-  
 
+
+  
+  //aus dem internet, zählt Vorkommen
+  private static int countOccs(String stringPar, char searchedChar, int index) { 
+      if (index >= stringPar.length()) {
+          return 0;
+      }
+      int count = stringPar.charAt(index) == searchedChar ? 1 : 0;
+      return count + countOccs(
+        stringPar, searchedChar, index + 1);
+  }
+
+
+  //performs a single operation
   public static double performOperation(double operand1, double operand2, char operator) {
     switch (operator) {
       case '+':
@@ -381,6 +451,8 @@ public class Main extends Application {
     throw new IllegalArgumentException("Invalid operator: " + operator);
   }
 
+
+  
   //Prints inputs and only checks if it's a special character, that isn't allowed to be written twice or at the beginning and prevents it
   //Use either output.appendText() or checkIfCanBeWritten() but not both
     
@@ -468,20 +540,22 @@ public class Main extends Application {
   
   public void bBrL_Action(Event evt) {
     textOut.appendText("(");
+    output = output + "(";
   }
 
   public void bBrR_Action(Event evt) {
-    textOut.appendText(")"); 
+    checkIfCanBeWritten(')');
+    //verhindert output = )
+    //nicht aber output = ())
   }
   
   public void bEnter_Action(Event evt) {
-    //add solve function
-    String solution = solve(output);
+    //add infixToPostfix function
+    String solution = infixToPostfix(output);//hier kein String inputen, sondern ArrayList<String>
+    System.out.println("Solution = " + solution);
     textOut.clear();
-    textOut.appendText(zahlen.get(0) + "");
-    System.out.println(output);
-    
-      
+    output = "";
+    System.out.println("PopStellen = " + POpstellen);
     
   }
 
@@ -489,13 +563,14 @@ public class Main extends Application {
 
     output = "";
     textOut.clear();
-    zahlen.clear();
-    operatoren.clear();
+    POpstellen.clear();
+    
+    
   }
 
   public void bDelete_Action(Event evt) {
     //add liste löschen, je nach zahl oder operator
-    if (output.length() > 0) {
+    if (output.length() > 0 && textOut.getLength() > 0) {
       output = output.substring(0, output.length() - 1);
       textOut.deleteText(textOut.getLength()-1, textOut.getLength());
     }
